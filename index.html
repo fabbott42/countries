@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+        <!-- jQuery first, then Tether, then Bootstrap JS. -->
+        <!--<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>-->
+        <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>  
+        <style>
+            #regions_header{display:none}
+        </style>
+    </head>
+    <body>
+        <h1>Country Search</h1>
+
+
+        <form>
+
+            <input type="text" name="country" size="50" />
+            <input type="submit" name="submit_search" value="Lookup" />
+        </form>
+        <div id="debug"></div>
+        <div id="results">
+
+        </div>
+
+        <div id="regions_header"><p><strong>Your search has turned up countries in the following regions and 
+                    subregions:</strong></p></div>
+        <div id="regions"></div>
+        <div id="subregions"></div>
+        <script>
+            (function () {
+
+                $("input[name='submit_search']").click(function (event) {
+                    event.preventDefault();
+
+                    if ($("input[name='country']").val() != "") {
+
+                        $("#debug").html("<p>You are searching for: " + $("input[name='country']").val() + "</p>");
+                        //$("#debug").css("border","1px solid red");
+                        $("#debug").css("font-style", "italic");
+                        $.getJSON("json.php?country=" + $("input[name='country']").val(), function (result) {
+                            var regions = {};
+                            var subregions = {};
+                            $("#results").html("");
+                            $("#regions").html("");
+                            $("#subregions").html("");
+                            $("#regions_header").hide();
+                            $.each(result, function (i, field) {
+                                var name_header = "<h4>" + field.name + "</h4><br />";
+                                var flag = "<img src=\"" + field.flag + "\" height=\"100\" width=\"100\" /><br />";
+                                var codes = "<strong>alpha2Code: </strong>" + field.alpha2Code + "<br />";
+                                codes += "<strong>alpha3Code: </strong>" + field.alpha3Code + "<br />";
+                                var languages = "<strong>Language(s): </strong>" + field.languages + "<br />";
+                                var region = "<strong>Region: </strong>" + field.region + "<br />";
+                                var subregion = "<strong>Subregion: </strong>" + field.subregion + "<br />";
+                                var population = "<strong>Population: </strong>" + field.population + "<br />";
+
+                                $("div#results").append(name_header);
+                                $("div#results").append(flag);
+                                $("div#results").append(codes);
+                                $("div#results").append(region);
+                                $("div#results").append(subregion);
+                                $("div#results").append(languages);
+                                $("div#results").append(population);
+                                $("div#results").append("<br /><br />");
+
+
+                                if (regions[field.region]) {
+                                    regions[field.region]++;
+                                } else {
+                                    regions[field.region] = 1;
+                                }
+
+                                if (subregions[field.subregion]) {
+                                    subregions[field.subregion]++;
+                                } else {
+                                    subregions[field.subregion] = 1;
+                                }
+
+                            });
+
+                            $("#regions_header").show();
+                            $.each(regions, function (i, region) {
+                                if (region > 1) {
+                                    $("div#regions").append(i + " (" + region + ")<br />");
+                                } else {
+                                    $("div#regions").append(i + "<br />");
+                                }
+
+                            });
+
+                            $.each(subregions, function (j, subregion) {
+                                if (subregion > 1) {
+                                    $("div#subregions").append(j + " (" + subregion + ")<br />");
+                                } else {
+                                    $("div#subregions").append(j + "<br />");
+                                }
+
+                            });
+                        });
+                    } else {
+                        $("#debug").html("<p>You need to enter a country's name or country code in this field.");
+                        $("#results").html("");
+                    }
+
+                });
+
+            })();
+        </script>   
+    </body>
+</html>
